@@ -117,6 +117,11 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
       <button class="pill" id="theme-btn" type="button"></button>
     </div>
     <h1 style="font-size: 34px">¿Qué palo practicas hoy?</h1>
+    <div id="install-card" hidden style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;background:var(--soft);border:1px solid var(--accent);border-radius:16px">
+      <b style="font-size:15px">Instala Compás en tu móvil</b>
+      <button class="pill outline" id="install-btn" type="button" hidden style="align-self:flex-start">Instalar app</button>
+      <p class="sub" id="install-help" hidden style="line-height:1.5">Si no ves el botón: en Chrome toca ⋮ (arriba a la derecha) y elige «Instalar aplicación». En Samsung Internet toca ≡ (abajo a la derecha), «Añadir página a» y «Pantalla de inicio».</p>
+    </div>
     <nav class="palos" id="palos" aria-label="Palos"></nav>
     <p class="foot">Cada palo arranca a su velocidad normal. Luego la subes o la bajas a tu gusto.</p>
   </section>
@@ -560,6 +565,17 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
 })();
 </script>
 
-<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }</script>
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
+(function () {
+  var instalada = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
+  if (instalada) return;
+  var card = document.getElementById('install-card'), btn = document.getElementById('install-btn'), help = document.getElementById('install-help'), aviso = null;
+  card.hidden = false; help.hidden = false;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); aviso = e; btn.hidden = false; help.hidden = true; });
+  btn.addEventListener('click', function () { if (!aviso) return; aviso.prompt(); aviso.userChoice.then(function (r) { if (r.outcome === 'accepted') card.hidden = true; aviso = null; btn.hidden = true; help.hidden = false; }); });
+  window.addEventListener('appinstalled', function () { card.hidden = true; });
+})();
+</script>
 </body>
 </html>
