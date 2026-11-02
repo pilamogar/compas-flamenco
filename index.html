@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#C25A1E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>html{color-scheme:light}body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Compás flamenco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: una columna de móvil, centrada, tres vistas (palos, practicar, combinaciones) */
+:root {
+  --bg: #FAF6F1; --card: #FFFFFF; --line: #E4D8CB; --fg: #1F1712; --muted: #675A4E;
+  --accent: #B2501A; --accent-fill: #C25A1E; --on-accent: #FFFFFF; --soft: #FBE6D6; --beat: #F1E9DF; --ring: #1F1712;
+  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --body: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17120F; --card: #241C18; --line: #3A2F29; --fg: #F4EEE6; --muted: #B8AA9C;
+  --accent: #F0A841; --accent-fill: #F0A841; --on-accent: #17120F; --soft: #3A2A16; --beat: #241C18; --ring: #F4EEE6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #17120F; --card: #241C18; --line: #3A2F29; --fg: #F4EEE6; --muted: #B8AA9C;
+  --accent: #F0A841; --accent-fill: #F0A841; --on-accent: #17120F; --soft: #3A2A16; --beat: #241C18; --ring: #F4EEE6; color-scheme: dark }
+
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; }
+button, input { font-family: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.app { max-width: 480px; margin: 0 auto; min-height: 100%; padding-block: 16px 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; }
+.view { display: flex; flex-direction: column; gap: 18px; flex: 1; }
+h1 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.08; text-wrap: balance; }
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.sub { margin: 0; font-size: 14px; color: var(--muted); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.link { min-height: 44px; display: inline-flex; align-items: center; gap: 4px; border: none; background: none; color: var(--accent); font-size: 15px; font-weight: 500; padding: 0; }
+.pill { min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.pill.outline { border-color: var(--accent); background: transparent; color: var(--accent); }
+
+/* Palos */
+.palos { display: flex; flex-direction: column; gap: 10px; }
+.palo { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 76px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; color: var(--fg); text-align: left; width: 100%; }
+.palo b { display: block; font-family: var(--display); font-size: 21px; }
+.palo small { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
+.palo .tempo { text-align: right; }
+.palo .tempo strong { display: block; font-size: 20px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.palo .tempo span { font-size: 11px; color: var(--muted); }
+.foot { margin: auto 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+/* Compás */
+.beats { display: grid; gap: 8px; }
+.beat { height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--beat); color: var(--muted); font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; padding: 0; transition: transform 60ms; }
+.beat.acc { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); }
+.beat.now { outline: 3px solid var(--ring); outline-offset: 2px; transform: scale(1.06); }
+.beat:disabled { cursor: default; opacity: 1; }
+.editing .beat { border-style: dashed; border-color: var(--fg); }
+
+/* Velocidad */
+.tempo-box { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; }
+.tempo-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.round { width: 56px; height: 56px; border-radius: 28px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 28px; line-height: 1; }
+.bpm { display: flex; flex-direction: column; align-items: center; }
+.bpm strong { font-family: var(--display); font-size: 56px; line-height: 1; font-variant-numeric: tabular-nums; }
+.bpm span { font-size: 12px; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px; margin: 0; }
+.tempo-note { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--muted); }
+
+/* Elementos */
+.toggles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.toggle { min-height: 60px; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--card); color: var(--muted); display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
+.toggle b { font-size: 15px; }
+.toggle span { font-size: 12px; }
+.toggle[aria-pressed="true"] { background: var(--soft); border-color: var(--accent); color: var(--fg); }
+.toggle:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.adv { border-top: 1px solid var(--line); }
+.adv-btn { width: 100%; min-height: 48px; border: none; background: none; color: var(--muted); font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; padding: 0; }
+.adv-btn svg { transition: transform 150ms; }
+.adv-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.adv-body { display: flex; flex-direction: column; gap: 10px; padding: 4px 0 8px; }
+.adv-body p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+.play { margin-top: auto; flex-shrink: 0; height: 64px; border-radius: 32px; border: none; background: var(--accent-fill); color: var(--on-accent); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; position: sticky; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+
+/* Combinaciones */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 14px; font-weight: 600; }
+.chip[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); }
+.mixer { display: flex; flex-direction: column; padding: 6px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; }
+.track { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; }
+.track + .track { border-top: 1px solid var(--line); }
+.track label { font-size: 15px; font-weight: 600; }
+.track .val { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track small { font-size: 12px; color: var(--muted); }
+.save { display: flex; gap: 8px; }
+.save input { flex: 1; min-width: 0; min-height: 48px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--fg); padding: 0 14px; font-size: 15px; }
+.save .pill { min-height: 48px; }
+.toast { font-size: 13px; color: var(--muted); min-height: 18px; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .beat, .adv-btn svg { transition: none; } .beat.now { transform: none; } }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <!-- Vista 1: elegir palo -->
+  <section class="view" id="v-palos">
+    <div class="row">
+      <p class="eyebrow">Compás</p>
+      <button class="pill" id="theme-btn" type="button"></button>
+    </div>
+    <h1 style="font-size: 34px">¿Qué palo practicas hoy?</h1>
+    <nav class="palos" id="palos" aria-label="Palos"></nav>
+    <p class="foot">Cada palo arranca a su velocidad normal. Luego la subes o la bajas a tu gusto.</p>
+  </section>
+
+  <!-- Vista 2: practicar -->
+  <section class="view" id="v-practica" hidden>
+    <div class="row">
+      <button class="link" type="button" data-go="palos">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Palos
+      </button>
+      <button class="link" type="button" data-go="combinaciones">Combinaciones</button>
+    </div>
+    <div>
+      <h1 id="p-nombre" style="font-size: 36px"></h1>
+      <p class="sub" id="p-resumen"></p>
+    </div>
+    <div class="beats" id="beats" aria-label="Compás"></div>
+    <div class="tempo-box">
+      <div class="tempo-row">
+        <button class="round" type="button" id="slower" aria-label="Más lento">−</button>
+        <div class="bpm"><strong id="bpm" aria-live="polite"></strong><span>pulsos por minuto</span></div>
+        <button class="round" type="button" id="faster" aria-label="Más rápido">+</button>
+      </div>
+      <label for="tempo-range" class="sub" style="position:absolute;left:-9999px">Velocidad</label>
+      <input type="range" id="tempo-range" step="1">
+      <div class="tempo-note"><span id="tempo-diff"></span><button class="pill outline" type="button" id="reset-tempo"></button></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <p class="eyebrow">Qué suena</p>
+      <div class="toggles" id="toggles"></div>
+    </div>
+    <div class="adv">
+      <button class="adv-btn" type="button" id="adv-btn" aria-expanded="false" aria-controls="adv-body">Ajustes avanzados
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="adv-body" id="adv-body" hidden>
+        <p>Toca un tiempo del compás de arriba para poner o quitar su acento.</p>
+        <button class="pill" type="button" id="restore-acc" style="align-self:flex-start"></button>
+      </div>
+    </div>
+    <button class="play" type="button" id="play"></button>
+  </section>
+
+  <!-- Vista 3: combinaciones -->
+  <section class="view" id="v-combinaciones" hidden>
+    <button class="link" type="button" data-go="practica" id="back-practica">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span id="back-label"></span>
+    </button>
+    <div>
+      <h1 style="font-size: 32px">Combinaciones</h1>
+      <p class="sub">Elige una mezcla rápida o ajusta cada sonido.</p>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="mixer" id="mixer"></div>
+    <form class="save" id="save-form">
+      <label for="save-name" style="position:absolute;left:-9999px">Nombre de la combinación</label>
+      <input id="save-name" placeholder="Nombre, por ejemplo «Ensayo»" maxlength="24" autocomplete="off">
+      <button class="pill outline" type="submit">Guardar</button>
+    </form>
+    <p class="toast" id="toast" aria-live="polite"></p>
+  </section>
+</div>
+
+<script>
+(function () {
+  // ---------- Datos de los palos (fichas del paso 1) ----------
+  var PALOS = {
+    bulerias:   { nombre: 'Bulerías',   compas: '12 tiempos', etiquetas: [12,1,2,3,4,5,6,7,8,9,10,11], acentos: [12,3,6,8,10], normal: 220, min: 160, max: 300, cols: 6 },
+    alegrias:   { nombre: 'Alegrías',   compas: '12 tiempos', etiquetas: [12,1,2,3,4,5,6,7,8,9,10,11], acentos: [12,3,6,8,10], normal: 160, min: 120, max: 220, cols: 6 },
+    sevillanas: { nombre: 'Sevillanas', compas: 'Ternario · 3 tiempos', etiquetas: [1,2,3], acentos: [1], normal: 200, min: 170, max: 230, cols: 3, palmasSuaves: true },
+    fandangos:  { nombre: 'Fandangos de Huelva', compas: 'Ternario · 3 tiempos', etiquetas: [1,2,3], acentos: [1], normal: 190, min: 160, max: 220, cols: 3 },
+    tanguillos: { nombre: 'Tanguillos', compas: '6/8 · 6 tiempos', etiquetas: [1,2,3,4,5,6], acentos: [1,4], normal: 200, min: 160, max: 240, cols: 6, palmasSuaves: true },
+    rumba:      { nombre: 'Rumba',      compas: '4 tiempos', etiquetas: [1,2,3,4], acentos: [1,3], normal: 120, min: 90, max: 150, cols: 4, sub: 2, palmasPasos: [0,3,6] }
+  };
+  var ORDEN = ['bulerias','alegrias','sevillanas','fandangos','tanguillos','rumba'];
+  var ELEM = [
+    { k: 'met', nombre: 'Metrónomo', detalle: 'Clic fuerte en los acentos' },
+    { k: 'pal', nombre: 'Palmas', detalle: 'Claras en los acentos, sordas en el resto' },
+    { k: 'caj', nombre: 'Caja', detalle: 'Grave en los acentos, agudo en el resto' },
+    { k: 'gui', nombre: 'Guitarra', detalle: 'Rasgueo de compás en el tono del palo' }
+  ];
+  var MEZCLAS = {
+    'Solo metrónomo': { met: 80, pal: 0, caj: 0, gui: 0 },
+    'Solo palmas': { met: 0, pal: 80, caj: 0, gui: 0 },
+    'Palmas + caja': { met: 0, pal: 80, caj: 70, gui: 0 },
+    'Metrónomo + palmas': { met: 60, pal: 80, caj: 0, gui: 0 },
+    'Guitarra + palmas': { met: 0, pal: 70, caj: 0, gui: 80 },
+    'Todo': { met: 40, pal: 80, caj: 70, gui: 75 }
+  };
+  // Guitarra: acordes (notas MIDI de grave a agudo) y qué acorde suena en cada tiempo de cada palo
+  var ACORDES = {
+    A: [45,52,57,61,64], Bb: [46,53,58,62,65], E: [40,47,52,56,59,64], B7: [47,51,57,59,66],
+    Am: [45,52,57,60,64], G: [43,47,50,55,59,67], F: [41,48,53,57,60,65], E7: [40,47,50,56,59,64]
+  };
+  var GUITARRA = {
+    bulerias:   { acorde: function (n) { return n === 8 ? 'Bb' : 'A'; }, soloAcentos: true },
+    alegrias:   { acorde: function (n) { return (n >= 6 && n <= 9) ? 'B7' : 'E'; }, soloAcentos: true },
+    sevillanas: { acorde: function (n, c) { return ['E','A','B7','E'][c % 4]; } },
+    fandangos:  { acorde: function (n, c) { return ['Am','G','F','E'][c % 4]; } },
+    tanguillos: { acorde: function (n, c) { return ['A','E7'][c % 2]; } },
+    rumba:      { acorde: function (n, c) { return ['Am','G','F','E'][c % 4]; }, pasos: [0,3,6] }
+  };
+
+  // ---------- Almacenamiento local (solo comodidad) ----------
+  function load(key, def) { try { var v = localStorage.getItem('compas.' + key); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+  function save(key, val) { try { localStorage.setItem('compas.' + key, JSON.stringify(val)); } catch (e) {} }
+
+  // ---------- Estado ----------
+  var S = {
+    vista: 'palos',
+    palo: 'bulerias',
+    tempo: 220,
+    vol: load('vol', { met: 60, pal: 80, caj: 0, gui: 0 }),
+    acentos: load('acentos', {}),
+    propias: load('propias', {}),
+    mezcla: load('mezcla', 'Metrónomo + palmas'),
+    tema: load('tema', 'light'),
+    sonando: false,
+    actual: -1,
+    avanzado: false
+  };
+  function palo() { return PALOS[S.palo]; }
+  function acentosDe(k) { return S.acentos[k] || PALOS[k].acentos; }
+  function on(k) { return S.vol[k] > 0; }
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- Tema ----------
+  function aplicarTema() {
+    document.documentElement.setAttribute('data-theme', S.tema);
+    var claro = S.tema === 'light';
+    $('theme-btn').innerHTML = (claro
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Modo oscuro'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Modo claro');
+  }
+  $('theme-btn').addEventListener('click', function () { S.tema = S.tema === 'light' ? 'dark' : 'light'; save('tema', S.tema); aplicarTema(); });
+
+  // ---------- Navegación ----------
+  function ir(v) {
+    S.vista = v;
+    ['palos','practica','combinaciones'].forEach(function (x) { $('v-' + x).hidden = x !== v; });
+    if (v === 'practica') pintarPractica();
+    if (v === 'combinaciones') pintarCombinaciones();
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function () { ir(b.getAttribute('data-go')); }); });
+
+  // ---------- Vista palos ----------
+  function pintarPalos() {
+    var html = '';
+    ORDEN.forEach(function (k) {
+      var p = PALOS[k];
+      var acc = acentosDe(k).slice().sort(function (a, b) { return p.etiquetas.indexOf(a) - p.etiquetas.indexOf(b); });
+      html += '<button class="palo" type="button" data-palo="' + k + '"><span><b>' + p.nombre + '</b><small>' + p.compas + ' · acentos ' + acc.join(', ') + '</small></span>' +
+        '<span class="tempo"><strong>' + p.normal + '</strong><span>pulsos/min</span></span></button>';
+    });
+    $('palos').innerHTML = html;
+    $('palos').querySelectorAll('[data-palo]').forEach(function (b) {
+      b.addEventListener('click', function () { elegirPalo(b.getAttribute('data-palo')); });
+    });
+  }
+  function elegirPalo(k) {
+    parar();
+    S.palo = k; S.tempo = PALOS[k].normal; S.actual = -1; S.avanzado = false;
+    ir('practica');
+  }
+
+  // ---------- Vista practicar ----------
+  function pintarPractica() {
+    var p = palo();
+    $('p-nombre').textContent = p.nombre;
+    $('back-label').textContent = p.nombre;
+    pintarResumen();
+    pintarBeats();
+    var r = $('tempo-range'); r.min = p.min; r.max = p.max;
+    pintarTempo();
+    pintarToggles();
+    $('adv-btn').setAttribute('aria-expanded', String(S.avanzado));
+    $('adv-body').hidden = !S.avanzado;
+    $('restore-acc').textContent = 'Restaurar acentos de ' + p.nombre.toLowerCase();
+    pintarPlay();
+  }
+  function pintarResumen() {
+    var p = palo();
+    var acc = p.etiquetas.filter(function (n) { return acentosDe(S.palo).indexOf(n) >= 0; });
+    $('p-resumen').textContent = p.compas + ' · acentos en ' + (acc.length ? acc.join(', ') : 'ninguno');
+  }
+  function pintarBeats() {
+    var p = palo(), acc = acentosDe(S.palo);
+    var box = $('beats');
+    box.style.gridTemplateColumns = 'repeat(' + p.cols + ', minmax(0, 1fr))';
+    box.classList.toggle('editing', S.avanzado);
+    var html = '';
+    p.etiquetas.forEach(function (n, i) {
+      var a = acc.indexOf(n) >= 0;
+      html += '<button type="button" class="beat' + (a ? ' acc' : '') + (i === S.actual ? ' now' : '') + '" data-i="' + i + '"' +
+        (S.avanzado ? '' : ' disabled') + ' aria-pressed="' + a + '" aria-label="Tiempo ' + n + (a ? ', con acento' : '') + '">' + n + '</button>';
+    });
+    box.innerHTML = html;
+  }
+  $('beats').addEventListener('click', function (e) {
+    var b = e.target.closest('.beat'); if (!b || !S.avanzado) return;
+    var n = palo().etiquetas[+b.getAttribute('data-i')];
+    var acc = acentosDe(S.palo).slice();
+    var j = acc.indexOf(n);
+    if (j >= 0) acc.splice(j, 1); else acc.push(n);
+    S.acentos[S.palo] = acc; save('acentos', S.acentos);
+    pintarBeats(); pintarResumen(); pintarPalos();
+  });
+  $('adv-btn').addEventListener('click', function () {
+    S.avanzado = !S.avanzado;
+    $('adv-btn').setAttribute('aria-expanded', String(S.avanzado));
+    $('adv-body').hidden = !S.avanzado;
+    pintarBeats();
+  });
+  $('restore-acc').addEventListener('click', function () {
+    delete S.acentos[S.palo]; save('acentos', S.acentos);
+    pintarBeats(); pintarResumen(); pintarPalos();
+  });
+
+  function pintarTempo() {
+    var p = palo();
+    $('bpm').textContent = S.tempo;
+    $('tempo-range').value = S.tempo;
+    var d = S.tempo - p.normal;
+    $('tempo-diff').textContent = d === 0 ? 'Velocidad normal' : (d > 0 ? '+' + d + ' sobre la normal' : (-d) + ' por debajo de la normal');
+    $('reset-tempo').textContent = 'Volver a normal (' + p.normal + ')';
+    $('reset-tempo').hidden = d === 0;
+  }
+  function setTempo(v) { var p = palo(); S.tempo = Math.max(p.min, Math.min(p.max, Math.round(v))); pintarTempo(); }
+  $('slower').addEventListener('click', function () { setTempo(S.tempo - 5); });
+  $('faster').addEventListener('click', function () { setTempo(S.tempo + 5); });
+  $('tempo-range').addEventListener('input', function (e) { setTempo(+e.target.value); });
+  $('reset-tempo').addEventListener('click', function () { setTempo(palo().normal); });
+
+  function pintarToggles() {
+    var html = '';
+    ELEM.forEach(function (e) {
+      var o = on(e.k);
+      html += '<button type="button" class="toggle" data-k="' + e.k + '" aria-pressed="' + (o && !e.pronto) + '"' + (e.pronto ? ' disabled' : '') + '>' +
+        '<b>' + e.nombre + '</b><span>' + (e.pronto ? 'Próximamente' : (o ? 'Suena' : 'Apagado')) + '</span></button>';
+    });
+    $('toggles').innerHTML = html;
+  }
+  $('toggles').addEventListener('click', function (e) {
+    var b = e.target.closest('.toggle'); if (!b || b.disabled) return;
+    var k = b.getAttribute('data-k');
+    S.vol[k] = on(k) ? 0 : (S.ultimo && S.ultimo[k]) || 75;
+    S.mezcla = ''; guardarMezcla(); pintarToggles();
+  });
+  function guardarMezcla() { save('vol', S.vol); save('mezcla', S.mezcla); }
+
+  function pintarPlay() {
+    $('play').innerHTML = S.sonando
+      ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>Parar'
+      : '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg>Empezar';
+  }
+  $('play').addEventListener('click', function () { if (S.sonando) parar(); else empezar(); });
+
+  // ---------- Vista combinaciones ----------
+  function todasMezclas() { var m = {}; Object.keys(MEZCLAS).forEach(function (k) { m[k] = MEZCLAS[k]; }); Object.keys(S.propias).forEach(function (k) { m[k] = S.propias[k]; }); return m; }
+  function pintarCombinaciones() {
+    var m = todasMezclas(), html = '';
+    Object.keys(m).forEach(function (n) {
+      html += '<button type="button" class="chip" aria-pressed="' + (S.mezcla === n) + '" data-n="' + n.replace(/"/g, '&quot;') + '">' + esc(n) + '</button>';
+    });
+    $('chips').innerHTML = html;
+    var mx = '';
+    ELEM.forEach(function (e) {
+      var v = S.vol[e.k];
+      mx += '<div class="track"><div class="row"><label for="vol-' + e.k + '">' + e.nombre + '</label><span class="val" id="val-' + e.k + '">' +
+        (e.pronto ? 'Próximamente' : (v === 0 ? 'Apagado' : v + ' %')) + '</span></div>' +
+        '<input type="range" min="0" max="100" step="5" id="vol-' + e.k + '" data-k="' + e.k + '" value="' + v + '"' + (e.pronto ? ' disabled' : '') + '>' +
+        '<small>' + e.detalle + '</small></div>';
+    });
+    $('mixer').innerHTML = mx;
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  $('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    var n = b.getAttribute('data-n'); var m = todasMezclas()[n];
+    S.vol = { met: m.met, pal: m.pal, caj: m.caj, gui: m.gui || 0 }; S.mezcla = n; guardarMezcla(); pintarCombinaciones();
+  });
+  $('mixer').addEventListener('input', function (e) {
+    var k = e.target.getAttribute('data-k'); if (!k) return;
+    S.vol[k] = +e.target.value; S.mezcla = '';
+    $('val-' + k).textContent = S.vol[k] === 0 ? 'Apagado' : S.vol[k] + ' %';
+    $('chips').querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
+    guardarMezcla();
+  });
+  $('save-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var n = $('save-name').value.trim();
+    if (!n) { $('toast').textContent = 'Escribe un nombre para guardar la combinación.'; return; }
+    S.propias[n] = { met: S.vol.met, pal: S.vol.pal, caj: S.vol.caj, gui: S.vol.gui };
+    S.mezcla = n; save('propias', S.propias); guardarMezcla();
+    $('save-name').value = ''; $('toast').textContent = 'Guardada «' + n + '».';
+    pintarCombinaciones();
+  });
+
+  // ---------- Motor de sonido (Web Audio, sonidos sintetizados) ----------
+  var ctx = null, master = null, ruido = null;
+  function audio() {
+    if (!ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+      var len = Math.floor(ctx.sampleRate * 0.4), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      ruido = buf;
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+  }
+  function env(t, peak, dur) { var g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); g.connect(master); return g; }
+  function noise(t, dur, filtros, g) {
+    var s = ctx.createBufferSource(); s.buffer = ruido;
+    var node = s; filtros.forEach(function (f) { node.connect(f); node = f; }); node.connect(g);
+    s.start(t, Math.random() * 0.2); s.stop(t + dur + 0.02);
+  }
+  function filtro(tipo, f, q) { var b = ctx.createBiquadFilter(); b.type = tipo; b.frequency.value = f; if (q) b.Q.value = q; return b; }
+
+  function clic(t, fuerte, vol) {
+    var o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = fuerte ? 1760 : 1100;
+    var g = env(t, vol * (fuerte ? 0.9 : 0.45), 0.05); o.connect(g); o.start(t); o.stop(t + 0.07);
+  }
+  function palma(t, clara, fuerte, vol) {
+    // Varias manos ligeramente desfasadas para que suene a palmas de grupo
+    var manos = clara ? 3 : 2;
+    for (var i = 0; i < manos; i++) {
+      var tt = t + i * 0.007 + Math.random() * 0.004;
+      if (clara) {
+        var g = env(tt, vol * (fuerte ? 0.75 : 0.4) / manos * 1.6, 0.07);
+        noise(tt, 0.08, [filtro('bandpass', 1500 + Math.random() * 600, 1.1), filtro('highpass', 700)], g);
+      } else {
+        var g2 = env(tt, vol * 0.35 / manos * 1.6, 0.05);
+        noise(tt, 0.06, [filtro('bandpass', 650 + Math.random() * 150, 1.4), filtro('lowpass', 1400)], g2);
+      }
+    }
+  }
+  function caja(t, grave, vol) {
+    if (grave) {
+      var o = ctx.createOscillator(); o.type = 'sine';
+      o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(55, t + 0.15);
+      var g = env(t, vol * 1.0, 0.28); o.connect(g); o.start(t); o.stop(t + 0.3);
+      noise(t, 0.04, [filtro('lowpass', 500)], env(t, vol * 0.3, 0.04));
+    } else {
+      noise(t, 0.09, [filtro('bandpass', 2600, 0.9)], env(t, vol * 0.45, 0.08));
+      var o2 = ctx.createOscillator(); o2.type = 'triangle'; o2.frequency.value = 260;
+      var g3 = env(t, vol * 0.15, 0.05); o2.connect(g3); o2.start(t); o2.stop(t + 0.06);
+    }
+  }
+
+  // Cuerda pulsada (Karplus-Strong), una por nota, guardada en caché
+  var cuerdas = {};
+  function cuerda(midi) {
+    if (cuerdas[midi]) return cuerdas[midi];
+    var sr = ctx.sampleRate, f = 440 * Math.pow(2, (midi - 69) / 12), N = Math.round(sr / f);
+    var len = Math.floor(sr * 1.6), buf = ctx.createBuffer(1, len, sr), y = buf.getChannelData(0);
+    for (var i = 0; i < N; i++) y[i] = Math.random() * 2 - 1;
+    var amort = 0.4985 + Math.min(0.0012, midi / 100000);
+    for (var j = N; j < len; j++) y[j] = amort * (y[j - N] + y[j - N - 1 < 0 ? 0 : j - N - 1]);
+    cuerdas[midi] = buf; return buf;
+  }
+  function rasgueo(t, nombre, fuerte, vol) {
+    var notas = ACORDES[nombre]; if (!notas) return;
+    var sep = fuerte ? 0.011 : 0.007, dur = fuerte ? 1.1 : 0.35;
+    notas.forEach(function (m, i) {
+      var s = ctx.createBufferSource(); s.buffer = cuerda(m);
+      var tt = t + i * sep;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(vol * (fuerte ? 0.32 : 0.14), tt);
+      g.gain.setTargetAtTime(0.0001, tt + dur * 0.6, dur * 0.25);
+      var tono = filtro('lowpass', fuerte ? 4200 : 2600);
+      s.connect(tono); tono.connect(g); g.connect(master);
+      s.start(tt); s.stop(tt + dur + 0.4);
+    });
+    // Golpe de las uñas sobre las cuerdas
+    if (fuerte) noise(t, 0.03, [filtro('highpass', 2500)], env(t, vol * 0.12, 0.03));
+  }
+
+  // ---------- Planificador con margen (tiempo preciso) ----------
+  var paso = 0, ciclo = 0, proximo = 0, timer = null, cola = [], raf = null, wake = null;
+  function tocarPaso(t, i) {
+    var p = palo(), sub = p.sub || 1, n = p.etiquetas.length;
+    var inicio = i % sub === 0, b = Math.floor(i / sub) % n;
+    var acento = acentosDe(S.palo).indexOf(p.etiquetas[b]) >= 0;
+    var v = function (k) { return S.vol[k] / 100; };
+    if (inicio && on('met')) clic(t, acento, v('met'));
+    if (on('pal')) {
+      if (p.palmasPasos) { if (p.palmasPasos.indexOf(i % (n * sub)) >= 0) palma(t, true, i % (n * sub) === 0, v('pal')); }
+      else if (inicio) {
+        if (acento) palma(t, true, true, v('pal'));
+        else if (p.palmasSuaves) palma(t, true, false, v('pal'));
+        else palma(t, false, false, v('pal'));
+      }
+    }
+    if (inicio && on('caj')) caja(t, acento, v('caj'));
+    if (on('gui')) {
+      var G = GUITARRA[S.palo], ac = G.acorde(p.etiquetas[b], ciclo);
+      if (G.pasos) { var pos = i % (n * sub); if (G.pasos.indexOf(pos) >= 0) rasgueo(t, ac, pos === 0, v('gui')); }
+      else if (inicio && (acento || !G.soloAcentos)) rasgueo(t, ac, acento, v('gui'));
+    }
+    if (inicio) cola.push({ t: t, b: b });
+  }
+  function programar() {
+    var p = palo(), sub = p.sub || 1, total = p.etiquetas.length * sub;
+    while (proximo < ctx.currentTime + 0.12) {
+      tocarPaso(proximo, paso);
+      proximo += 60 / S.tempo / sub;
+      paso = (paso + 1) % total;
+      if (paso === 0) ciclo++;
+    }
+  }
+  function pintarAhora() {
+    while (cola.length && cola[0].t <= ctx.currentTime) {
+      var x = cola.shift();
+      var prev = $('beats').querySelector('.now'); if (prev) prev.classList.remove('now');
+      var el = $('beats').querySelector('[data-i="' + x.b + '"]'); if (el) el.classList.add('now');
+      S.actual = x.b;
+    }
+    if (S.sonando) raf = requestAnimationFrame(pintarAhora);
+  }
+  function empezar() {
+    audio();
+    S.sonando = true; paso = 0; ciclo = 0; cola = []; proximo = ctx.currentTime + 0.08;
+    timer = setInterval(programar, 25); programar();
+    raf = requestAnimationFrame(pintarAhora);
+    pintarPlay();
+    try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {}); } catch (e) {}
+  }
+  function parar() {
+    if (!S.sonando) return;
+    S.sonando = false; clearInterval(timer); cancelAnimationFrame(raf); cola = [];
+    S.actual = -1;
+    var prev = $('beats').querySelector('.now'); if (prev) prev.classList.remove('now');
+    pintarPlay();
+    try { if (wake) { wake.release(); wake = null; } } catch (e) {}
+  }
+
+  aplicarTema();
+  pintarPalos();
+})();
+</script>
+
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }</script>
+</body>
+</html>
