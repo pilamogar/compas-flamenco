@@ -3,29 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#C25A1E">
+<meta name="theme-color" content="#1D3A8A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <style>html{color-scheme:light}body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 <title>Compás flamenco</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=Nunito+Sans:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: una columna de móvil, centrada, tres vistas (palos, practicar, combinaciones) */
+/* Estilo Azulejo: cerámica de Triana, azul cobalto y ocre, tarjetas con marco de baldosa */
 :root {
-  --bg: #FAF6F1; --card: #FFFFFF; --line: #E4D8CB; --fg: #1F1712; --muted: #675A4E;
-  --accent: #B2501A; --accent-fill: #C25A1E; --on-accent: #FFFFFF; --soft: #FBE6D6; --beat: #F1E9DF; --ring: #1F1712;
-  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
-  --body: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --bg: #FBF9F4; --card: #FFFFFF; --line: #D5DBEC; --fg: #14203F; --muted: #5B6480;
+  --accent: #1D3A8A; --accent-fill: #1D3A8A; --accent-deep: #122663; --on-accent: #FFFFFF; --soft: #F3F5FB; --beat: #E9EDF7; --ring: #D8902A;
+  --head: #122663; --ocre: #D8902A; --tile: #E9EDF7; --tile-line: #C9D2EA;
+  --display: 'Yeseva One', Georgia, 'Times New Roman', serif;
+  --body: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #17120F; --card: #241C18; --line: #3A2F29; --fg: #F4EEE6; --muted: #B8AA9C;
-  --accent: #F0A841; --accent-fill: #F0A841; --on-accent: #17120F; --soft: #3A2A16; --beat: #241C18; --ring: #F4EEE6; color-scheme: dark } }
+  --bg: #0E1630; --card: #16224A; --line: #2A3A6E; --fg: #EEF1FA; --muted: #A5B0D0;
+  --accent: #A9BEFF; --accent-fill: #3557C4; --accent-deep: #233F9E; --on-accent: #FFFFFF; --soft: #1C2B5C; --beat: #1A2650; --ring: #E8A845;
+  --head: #DCE4FF; --ocre: #E8A845; --tile: #1F2D5C; --tile-line: #33467F; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #17120F; --card: #241C18; --line: #3A2F29; --fg: #F4EEE6; --muted: #B8AA9C;
-  --accent: #F0A841; --accent-fill: #F0A841; --on-accent: #17120F; --soft: #3A2A16; --beat: #241C18; --ring: #F4EEE6; color-scheme: dark }
+  --bg: #0E1630; --card: #16224A; --line: #2A3A6E; --fg: #EEF1FA; --muted: #A5B0D0;
+  --accent: #A9BEFF; --accent-fill: #3557C4; --accent-deep: #233F9E; --on-accent: #FFFFFF; --soft: #1C2B5C; --beat: #1A2650; --ring: #E8A845;
+  --head: #DCE4FF; --ocre: #E8A845; --tile: #1F2D5C; --tile-line: #33467F; color-scheme: dark }
 
 html, body { height: 100%; }
 body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; -webkit-tap-highlight-color: transparent; }
@@ -33,22 +37,25 @@ body { background: var(--bg); color: var(--fg); font-family: var(--body); font-s
 button, input { font-family: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.app { max-width: 480px; margin: 0 auto; min-height: 100%; padding-block: 16px 24px;
+.cenefa { height: 22px; border-bottom: 3px solid var(--ocre);
+  background: radial-gradient(circle, var(--ocre) 0 3px, transparent 3.5px) 11px 11px / 22px 22px,
+    conic-gradient(from 45deg, var(--accent-fill) 0 25%, var(--bg) 0 50%, var(--accent-fill) 0 75%, var(--bg) 0) 0 0 / 22px 22px; }
+.app { max-width: 480px; margin: 0 auto; min-height: calc(100% - 25px); padding-block: 18px 24px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: flex; flex-direction: column; }
 .view { display: flex; flex-direction: column; gap: 18px; flex: 1; }
-h1 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.08; text-wrap: balance; }
-.eyebrow { margin: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; color: var(--head); line-height: 1.08; text-wrap: balance; }
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ocre); font-weight: 800; }
 .sub { margin: 0; font-size: 14px; color: var(--muted); }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .link { min-height: 44px; display: inline-flex; align-items: center; gap: 4px; border: none; background: none; color: var(--accent); font-size: 15px; font-weight: 500; padding: 0; }
-.pill { min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.pill { min-height: 44px; padding: 0 14px; border-radius: 4px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
 .pill.outline { border-color: var(--accent); background: transparent; color: var(--accent); }
 
 /* Palos */
 .palos { display: flex; flex-direction: column; gap: 10px; }
-.palo { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 76px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; color: var(--fg); text-align: left; width: 100%; }
-.palo b { display: block; font-family: var(--display); font-size: 21px; }
+.palo { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 76px; padding: 14px 16px; background: var(--card); border: 2px solid var(--accent-fill); border-radius: 4px; box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 4px var(--ocre); color: var(--fg); text-align: left; width: 100%; }
+.palo b { display: block; font-family: var(--display); font-weight: 400; font-size: 21px; color: var(--head); }
 .palo small { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
 .palo .tempo { text-align: right; }
 .palo .tempo strong { display: block; font-size: 20px; color: var(--accent); font-variant-numeric: tabular-nums; }
@@ -57,28 +64,33 @@ h1 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.08
 
 /* Compás */
 .beats { display: grid; gap: 8px; }
-.beat { height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--beat); color: var(--muted); font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; padding: 0; transition: transform 60ms; }
-.beat.acc { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); }
+.beat { height: 48px; border-radius: 3px; border: 1px solid var(--tile-line); background: var(--beat); color: var(--accent); font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; padding: 0; transition: transform 60ms; }
+.beat.acc { border-color: var(--accent-fill); color: var(--on-accent);
+  background: radial-gradient(circle at 0 0, var(--ocre) 0 5px, transparent 5.5px), radial-gradient(circle at 100% 100%, var(--ocre) 0 5px, transparent 5.5px), var(--accent-fill); }
 .beat.now { outline: 3px solid var(--ring); outline-offset: 2px; transform: scale(1.06); }
 .beat:disabled { cursor: default; opacity: 1; }
 .editing .beat { border-style: dashed; border-color: var(--fg); }
 
 /* Velocidad */
-.tempo-box { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; }
+.tempo-box { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: var(--card); border: 2px solid var(--accent-fill); border-radius: 4px; box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 4px var(--tile); }
 .tempo-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-.round { width: 56px; height: 56px; border-radius: 28px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 28px; line-height: 1; }
+.round { width: 56px; height: 56px; border-radius: 28px; border: 0; background: var(--tile); color: var(--accent); font-size: 28px; line-height: 1; }
 .bpm { display: flex; flex-direction: column; align-items: center; }
-.bpm strong { font-family: var(--display); font-size: 56px; line-height: 1; font-variant-numeric: tabular-nums; }
+.bpm strong { font-family: var(--display); font-weight: 400; color: var(--head); font-size: 56px; line-height: 1; font-variant-numeric: tabular-nums; }
 .bpm span { font-size: 12px; color: var(--muted); }
-input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px; margin: 0; }
+input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin: 0; }
 .tempo-note { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--muted); }
 
 /* Elementos */
 .toggles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.toggle { min-height: 60px; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--card); color: var(--muted); display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
-.toggle b { font-size: 15px; }
-.toggle span { font-size: 12px; }
-.toggle[aria-pressed="true"] { background: var(--soft); border-color: var(--accent); color: var(--fg); }
+.toggle { min-height: 68px; padding: 10px; border-radius: 4px; border: 2px solid var(--line); background: var(--card); color: var(--muted); display: flex; align-items: center; gap: 10px; text-align: left; }
+.toggle .txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.toggle b { font-size: 15px; color: var(--fg); overflow-wrap: anywhere; }
+.toggle .txt span { font-size: 12px; }
+.ic { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 3px; background: var(--tile); color: var(--muted); display: flex; align-items: center; justify-content: center; }
+.ic svg { width: 26px; height: 26px; }
+.toggle[aria-pressed="true"] { background: var(--soft); border-color: var(--accent-fill); color: var(--accent); }
+.toggle[aria-pressed="true"] .ic, .tile-on { color: #FFFFFF; background: radial-gradient(circle at 0 0, var(--ocre) 0 5px, transparent 5.5px), radial-gradient(circle at 100% 0, var(--ocre) 0 5px, transparent 5.5px), radial-gradient(circle at 0 100%, var(--ocre) 0 5px, transparent 5.5px), radial-gradient(circle at 100% 100%, var(--ocre) 0 5px, transparent 5.5px), var(--accent-fill); }
 .toggle:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .adv { border-top: 1px solid var(--line); }
@@ -88,20 +100,23 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
 .adv-body { display: flex; flex-direction: column; gap: 10px; padding: 4px 0 8px; }
 .adv-body p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 
-.play { margin-top: auto; flex-shrink: 0; height: 64px; border-radius: 32px; border: none; background: var(--accent-fill); color: var(--on-accent); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; position: sticky; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+.play { margin-top: auto; flex-shrink: 0; height: 64px; border-radius: 4px; border: none; background: var(--accent-fill); box-shadow: inset 0 -4px 0 var(--accent-deep), 0 6px 18px rgba(0,0,0,0.12) !important; color: var(--on-accent); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; position: sticky; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
 
 /* Combinaciones */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 14px; font-weight: 600; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 4px; border: 2px solid var(--tile-line); background: var(--card); color: var(--fg); font-size: 14px; font-weight: 600; }
 .chip[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); }
-.mixer { display: flex; flex-direction: column; padding: 6px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; }
-.track { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; }
+.mixer { display: flex; flex-direction: column; padding: 6px 16px; background: var(--card); border: 2px solid var(--accent-fill); border-radius: 4px; }
+.track { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+.track .ic { width: 38px; height: 38px; color: var(--accent); }
+.track .ic svg { width: 22px; height: 22px; }
+.track .tbody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .track + .track { border-top: 1px solid var(--line); }
 .track label { font-size: 15px; font-weight: 600; }
-.track .val { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track .val { font-size: 13px; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
 .track small { font-size: 12px; color: var(--muted); }
 .save { display: flex; gap: 8px; }
-.save input { flex: 1; min-width: 0; min-height: 48px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--fg); padding: 0 14px; font-size: 15px; }
+.save input { flex: 1; min-width: 0; min-height: 48px; border-radius: 4px; border: 1px solid var(--line); background: var(--card); color: var(--fg); padding: 0 14px; font-size: 15px; }
 .save .pill { min-height: 48px; }
 .toast { font-size: 13px; color: var(--muted); min-height: 18px; margin: 0; }
 @media (prefers-reduced-motion: reduce) { .beat, .adv-btn svg { transition: none; } .beat.now { transform: none; } }
@@ -109,6 +124,7 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
 
 </head>
 <body>
+<div class="cenefa" aria-hidden="true"></div>
 <div class="app">
   <!-- Vista 1: elegir palo -->
   <section class="view" id="v-palos">
@@ -117,7 +133,7 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
       <button class="pill" id="theme-btn" type="button"></button>
     </div>
     <h1 style="font-size: 34px">¿Qué palo practicas hoy?</h1>
-    <div id="install-card" hidden style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;background:var(--soft);border:1px solid var(--accent);border-radius:16px">
+    <div id="install-card" hidden style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;background:var(--soft);border:2px solid var(--accent-fill);border-radius:4px">
       <b style="font-size:15px">Instala Compás en tu móvil</b>
       <button class="pill outline" id="install-btn" type="button" hidden style="align-self:flex-start">Instalar app</button>
       <p class="sub" id="install-help" hidden style="line-height:1.5">Si no ves el botón: en Chrome toca ⋮ (arriba a la derecha) y elige «Instalar aplicación». En Samsung Internet toca ≡ (abajo a la derecha), «Añadir página a» y «Pantalla de inicio».</p>
@@ -204,6 +220,13 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
     { k: 'caj', nombre: 'Caja', detalle: 'Grave en los acentos, agudo en el resto' },
     { k: 'gui', nombre: 'Guitarra', detalle: 'Rasgueo de compás en el tono del palo' }
   ];
+  // Iconos dibujados (estilo azulejo) para cada sonido
+  var ICONOS = {
+    met: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l4.5 18h-15z"/><path d="M6.5 16h11"/><path d="M12 16l5-10"/><circle cx="17" cy="6" r="1.2" fill="currentColor"/></svg>',
+    pal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="8" width="6" height="13" rx="3" transform="rotate(-18 7.5 14.5)"/><rect x="13.5" y="8" width="6" height="13" rx="3" transform="rotate(18 16.5 14.5)"/><path d="M12 2.5v3M8 3.5l1.2 2.3M16 3.5l-1.2 2.3"/></svg>',
+    caj: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h12l1 19H5z"/><circle cx="12" cy="9" r="2.6"/><path d="M5.6 16.5h12.8"/></svg>',
+    gui: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 9.4a3.3 3.3 0 0 0-4.7.2c-.8.9-.7 2-1.6 2.6-1 .7-2.5.4-3.6 1.6a4.4 4.4 0 0 0 6.2 6.2c1.2-1.1.9-2.6 1.6-3.6.6-.9 1.7-.8 2.6-1.6a3.3 3.3 0 0 0-.5-5.4z"/><circle cx="8.7" cy="15.3" r="1.3"/><path d="M12.5 11.5L20 4"/><path d="M18.6 2.6l2.8 2.8"/></svg>'
+  };
   var MEZCLAS = {
     'Solo metrónomo': { met: 80, pal: 0, caj: 0, gui: 0 },
     'Solo palmas': { met: 0, pal: 80, caj: 0, gui: 0 },
@@ -363,7 +386,7 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
     ELEM.forEach(function (e) {
       var o = on(e.k);
       html += '<button type="button" class="toggle" data-k="' + e.k + '" aria-pressed="' + (o && !e.pronto) + '"' + (e.pronto ? ' disabled' : '') + '>' +
-        '<b>' + e.nombre + '</b><span>' + (e.pronto ? 'Próximamente' : (o ? 'Suena' : 'Apagado')) + '</span></button>';
+        '<span class="ic">' + ICONOS[e.k] + '</span><span class="txt"><b>' + e.nombre + '</b><span>' + (e.pronto ? 'Próximamente' : (o ? 'Suena' : 'Apagado')) + '</span></span></button>';
     });
     $('toggles').innerHTML = html;
   }
@@ -393,10 +416,10 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
     var mx = '';
     ELEM.forEach(function (e) {
       var v = S.vol[e.k];
-      mx += '<div class="track"><div class="row"><label for="vol-' + e.k + '">' + e.nombre + '</label><span class="val" id="val-' + e.k + '">' +
+      mx += '<div class="track"><span class="ic">' + ICONOS[e.k] + '</span><div class="tbody"><div class="row"><label for="vol-' + e.k + '">' + e.nombre + '</label><span class="val" id="val-' + e.k + '">' +
         (e.pronto ? 'Próximamente' : (v === 0 ? 'Apagado' : v + ' %')) + '</span></div>' +
         '<input type="range" min="0" max="100" step="5" id="vol-' + e.k + '" data-k="' + e.k + '" value="' + v + '"' + (e.pronto ? ' disabled' : '') + '>' +
-        '<small>' + e.detalle + '</small></div>';
+        '<small>' + e.detalle + '</small></div></div>';
     });
     $('mixer').innerHTML = mx;
   }
