@@ -168,6 +168,10 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
     <div style="display:flex;flex-direction:column;gap:8px">
       <p class="eyebrow">Qué suena</p>
       <div class="toggles" id="toggles"></div>
+      <div class="chips" id="palmas-tipo" role="group" aria-label="Tipo de palmas">
+        <button type="button" class="chip" data-sordas="0">Palmas claras y sordas</button>
+        <button type="button" class="chip" data-sordas="1">Solo palmas sordas</button>
+      </div>
     </div>
     <div class="adv">
       <button class="adv-btn" type="button" id="adv-btn" aria-expanded="false" aria-controls="adv-body">Ajustes avanzados
@@ -198,7 +202,7 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
       <button class="pill outline" type="submit">Guardar</button>
     </form>
     <p class="toast" id="toast" aria-live="polite"></p>
-    <p class="sub" style="font-size:12px;margin-top:auto">Sonidos: palmas y cajón de <a href="https://gitlab.com/acompas/acompas" style="color:inherit">A Compás</a> (CC0); guitarra de quartertone vía <a href="https://github.com/nbrosowsky/tonejs-instruments" style="color:inherit">tonejs-instruments</a> (CC BY 3.0). <a href="sonidos/CREDITOS.md" style="color:inherit">Créditos</a></p>
+    <p class="sub" style="font-size:12px;margin-top:auto">Sonidos: palmas y cajón de <a href="https://gitlab.com/acompas/acompas" style="color:inherit">A Compás</a> (CC0); jaleos de Aziz Andry para A Compás (CC0); guitarra de quartertone vía <a href="https://github.com/nbrosowsky/tonejs-instruments" style="color:inherit">tonejs-instruments</a> (CC BY 3.0). <a href="sonidos/CREDITOS.md" style="color:inherit">Créditos</a></p>
   </section>
 </div>
 
@@ -216,15 +220,17 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
   var ORDEN = ['bulerias','alegrias','sevillanas','fandangos','tanguillos','rumba'];
   var ELEM = [
     { k: 'met', nombre: 'Metrónomo', detalle: 'Clic fuerte en los acentos' },
-    { k: 'pal', nombre: 'Palmas', detalle: 'Claras en los acentos, sordas en el resto' },
+    { k: 'pal', nombre: 'Palmas', detalle: 'Claras en los acentos y sordas en el resto, o solo sordas' },
     { k: 'caj', nombre: 'Caja', detalle: 'Grave en los acentos, agudo en el resto' },
-    { k: 'gui', nombre: 'Guitarra', detalle: 'Rasgueo de compás en el tono del palo' }
+    { k: 'gui', nombre: 'Guitarra', detalle: 'Rasgueo de compás en el tono del palo' },
+    { k: 'jal', nombre: 'Jaleos', detalle: 'Gritos de ánimo de vez en cuando, como en un ensayo' }
   ];
   // Iconos dibujados (estilo azulejo) para cada sonido
   var ICONOS = {
     met: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l4.5 18h-15z"/><path d="M6.5 16h11"/><path d="M12 16l5-10"/><circle cx="17" cy="6" r="1.2" fill="currentColor"/></svg>',
     pal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="8" width="6" height="13" rx="3" transform="rotate(-18 7.5 14.5)"/><rect x="13.5" y="8" width="6" height="13" rx="3" transform="rotate(18 16.5 14.5)"/><path d="M12 2.5v3M8 3.5l1.2 2.3M16 3.5l-1.2 2.3"/></svg>',
     caj: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h12l1 19H5z"/><circle cx="12" cy="9" r="2.6"/><path d="M5.6 16.5h12.8"/></svg>',
+    jal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h12a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H10l-4 3.5V15.5H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"/><path d="M10 8v3.2"/><circle cx="10" cy="13.2" r=".6" fill="currentColor"/><path d="M20.5 7.5c1 1.4 1 3.6 0 5"/></svg>',
     gui: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.2 9.4a3.3 3.3 0 0 0-4.7.2c-.8.9-.7 2-1.6 2.6-1 .7-2.5.4-3.6 1.6a4.4 4.4 0 0 0 6.2 6.2c1.2-1.1.9-2.6 1.6-3.6.6-.9 1.7-.8 2.6-1.6a3.3 3.3 0 0 0-.5-5.4z"/><circle cx="8.7" cy="15.3" r="1.3"/><path d="M12.5 11.5L20 4"/><path d="M18.6 2.6l2.8 2.8"/></svg>'
   };
   var MEZCLAS = {
@@ -233,7 +239,9 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
     'Palmas + caja': { met: 0, pal: 80, caj: 70, gui: 0 },
     'Metrónomo + palmas': { met: 60, pal: 80, caj: 0, gui: 0 },
     'Guitarra + palmas': { met: 0, pal: 70, caj: 0, gui: 80 },
-    'Todo': { met: 40, pal: 80, caj: 70, gui: 75 }
+    'Todo': { met: 40, pal: 80, caj: 70, gui: 75 },
+    // Como un compás de ensayo: solo palmas sordas, con los acentos marcados, y jaleos sueltos
+    'Sordas y jaleos': { met: 0, pal: 85, caj: 0, gui: 0, jal: 70, sordas: true }
   };
   // Guitarra: acordes (notas MIDI de grave a agudo) y qué acorde suena en cada tiempo de cada palo
   var ACORDES = {
@@ -258,7 +266,8 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
     vista: 'palos',
     palo: 'bulerias',
     tempo: 220,
-    vol: load('vol', { met: 60, pal: 80, caj: 0, gui: 0 }),
+    vol: load('vol', { met: 60, pal: 80, caj: 0, gui: 0, jal: 0 }),
+    sordas: load('sordas', false),
     acentos: load('acentos', {}),
     propias: load('propias', {}),
     mezcla: load('mezcla', 'Metrónomo + palmas'),
@@ -269,7 +278,8 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
   };
   function palo() { return PALOS[S.palo]; }
   function acentosDe(k) { return S.acentos[k] || PALOS[k].acentos; }
-  function on(k) { return S.vol[k] > 0; }
+  function on(k) { return (S.vol[k] || 0) > 0; }
+  if (S.vol.jal === undefined) S.vol.jal = 0;
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -389,14 +399,25 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
         '<span class="ic">' + ICONOS[e.k] + '</span><span class="txt"><b>' + e.nombre + '</b><span>' + (e.pronto ? 'Próximamente' : (o ? 'Suena' : 'Apagado')) + '</span></span></button>';
     });
     $('toggles').innerHTML = html;
+    pintarSordas();
   }
+  function pintarSordas() {
+    $('palmas-tipo').hidden = !on('pal') || !!palo().palmasPasos;
+    $('palmas-tipo').querySelectorAll('[data-sordas]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String((b.getAttribute('data-sordas') === '1') === S.sordas));
+    });
+  }
+  $('palmas-tipo').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sordas]'); if (!b) return;
+    S.sordas = b.getAttribute('data-sordas') === '1'; S.mezcla = ''; guardarMezcla(); pintarSordas();
+  });
   $('toggles').addEventListener('click', function (e) {
     var b = e.target.closest('.toggle'); if (!b || b.disabled) return;
     var k = b.getAttribute('data-k');
     S.vol[k] = on(k) ? 0 : (S.ultimo && S.ultimo[k]) || 75;
     S.mezcla = ''; guardarMezcla(); pintarToggles();
   });
-  function guardarMezcla() { save('vol', S.vol); save('mezcla', S.mezcla); }
+  function guardarMezcla() { save('vol', S.vol); save('mezcla', S.mezcla); save('sordas', S.sordas); }
 
   function pintarPlay() {
     $('play').innerHTML = S.sonando
@@ -415,7 +436,7 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
     $('chips').innerHTML = html;
     var mx = '';
     ELEM.forEach(function (e) {
-      var v = S.vol[e.k];
+      var v = S.vol[e.k] || 0;
       mx += '<div class="track"><span class="ic">' + ICONOS[e.k] + '</span><div class="tbody"><div class="row"><label for="vol-' + e.k + '">' + e.nombre + '</label><span class="val" id="val-' + e.k + '">' +
         (e.pronto ? 'Próximamente' : (v === 0 ? 'Apagado' : v + ' %')) + '</span></div>' +
         '<input type="range" min="0" max="100" step="5" id="vol-' + e.k + '" data-k="' + e.k + '" value="' + v + '"' + (e.pronto ? ' disabled' : '') + '>' +
@@ -427,7 +448,7 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
   $('chips').addEventListener('click', function (e) {
     var b = e.target.closest('.chip'); if (!b) return;
     var n = b.getAttribute('data-n'); var m = todasMezclas()[n];
-    S.vol = { met: m.met, pal: m.pal, caj: m.caj, gui: m.gui || 0 }; S.mezcla = n; guardarMezcla(); pintarCombinaciones();
+    S.vol = { met: m.met, pal: m.pal, caj: m.caj, gui: m.gui || 0, jal: m.jal || 0 }; S.sordas = !!m.sordas; S.mezcla = n; guardarMezcla(); pintarCombinaciones();
   });
   $('mixer').addEventListener('input', function (e) {
     var k = e.target.getAttribute('data-k'); if (!k) return;
@@ -440,7 +461,7 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
     e.preventDefault();
     var n = $('save-name').value.trim();
     if (!n) { $('toast').textContent = 'Escribe un nombre para guardar la combinación.'; return; }
-    S.propias[n] = { met: S.vol.met, pal: S.vol.pal, caj: S.vol.caj, gui: S.vol.gui };
+    S.propias[n] = { met: S.vol.met, pal: S.vol.pal, caj: S.vol.caj, gui: S.vol.gui, jal: S.vol.jal, sordas: S.sordas };
     S.mezcla = n; save('propias', S.propias); guardarMezcla();
     $('save-name').value = ''; $('toast').textContent = 'Guardada «' + n + '».';
     pintarCombinaciones();
@@ -537,12 +558,13 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
     clara: ['palmas/clara_1.wav', 'palmas/clara_2.wav', 'palmas/clara_3.wav'],
     sorda: ['palmas/sorda_1.wav', 'palmas/sorda_2.wav', 'palmas/sorda_3.wav'],
     cajonGrave: ['cajon/cajon_1.wav'],
-    cajonAgudo: ['cajon/cajon_2.wav']
+    cajonAgudo: ['cajon/cajon_2.wav'],
+    jaleo: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].map(function (n) { return 'jaleos/jaleo_' + n + '.mp3'; })
   };
   // Notas grabadas de la guitarra (MIDI → archivo); las demás se sacan de la más cercana
   var NOTAS_GUITARRA = { 40: 'E2', 42: 'Fs2', 44: 'Gs2', 45: 'A2', 47: 'B2', 49: 'Cs3', 50: 'D3', 52: 'E3',
     54: 'Fs3', 55: 'G3', 59: 'B3', 61: 'Cs4', 63: 'Ds4', 64: 'E4', 66: 'Fs4', 68: 'Gs4' };
-  var M = { clara: [], sorda: [], cajonGrave: [], cajonAgudo: [], guitarra: {} }, cargando = false;
+  var M = { clara: [], sorda: [], cajonGrave: [], cajonAgudo: [], jaleo: [], guitarra: {} }, cargando = false;
   function decodificar(datos) {
     // Forma con callbacks para que funcione también en Safari antiguo
     return new Promise(function (ok, mal) { ctx.decodeAudioData(datos, ok, mal); });
@@ -581,11 +603,21 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
     var lista = clara ? M.clara : M.sorda;
     if (!lista.length) return palmaSintetica(t, clara, fuerte, vol);
     // Varias manos ligeramente desfasadas y con distinta grabación, como un grupo de palmeros
-    var manos = clara ? (fuerte ? 3 : 2) : 2;
-    var nivel = clara ? (fuerte ? 0.9 : 0.5) : 0.6;
+    // Las sordas fuertes (acentos con «solo sordas») suenan con más manos y más volumen
+    var manos = fuerte ? 3 : 2;
+    var nivel = clara ? (fuerte ? 0.9 : 0.5) : (fuerte ? 1.0 : 0.5);
     for (var i = 0; i < manos; i++) {
       sonar(algunaDe(lista), t + i * 0.006 + Math.random() * 0.004, vol * nivel / Math.sqrt(manos), 0.96 + Math.random() * 0.08);
     }
+  }
+  // Jaleo grabado; nunca el mismo dos veces seguidas. Sin grabaciones, no suena nada.
+  var ultimoJaleo = null;
+  function jaleo(t, vol) {
+    if (!M.jaleo.length) return;
+    var m = algunaDe(M.jaleo);
+    if (m === ultimoJaleo && M.jaleo.length > 1) m = algunaDe(M.jaleo);
+    ultimoJaleo = m;
+    sonar(m, t, vol * 0.75, 0.98 + Math.random() * 0.04);
   }
   function caja(t, grave, vol) {
     var lista = grave ? M.cajonGrave : M.cajonAgudo;
@@ -613,17 +645,29 @@ input[type=range] { width: 100%; accent-color: var(--ocre); height: 28px; margin
   }
 
   // ---------- Planificador con margen (tiempo preciso) ----------
-  var paso = 0, ciclo = 0, proximo = 0, timer = null, cola = [], raf = null, wake = null;
+  var paso = 0, ciclo = 0, proximo = 0, timer = null, cola = [], raf = null, wake = null, jaleoEn = -1;
+  // Al empezar cada compás decide si habrá jaleo y en qué tiempo: en los palos de 12,
+  // justo en un acento (3 o 10 suelen ser buenos sitios); en los demás, en el primer tiempo.
+  function planearJaleo() {
+    var p = palo();
+    jaleoEn = -1;
+    if (ciclo === 0 || Math.random() > (p.etiquetas.length >= 12 ? 0.55 : 0.3)) return;
+    var sitios = p.etiquetas.length >= 12 ? [3, 10] : [p.etiquetas[0]];
+    jaleoEn = p.etiquetas.indexOf(algunaDe(sitios));
+  }
   function tocarPaso(t, i) {
     var p = palo(), sub = p.sub || 1, n = p.etiquetas.length;
     var inicio = i % sub === 0, b = Math.floor(i / sub) % n;
     var acento = acentosDe(S.palo).indexOf(p.etiquetas[b]) >= 0;
-    var v = function (k) { return S.vol[k] / 100; };
+    var v = function (k) { return (S.vol[k] || 0) / 100; };
+    if (i === 0) planearJaleo();
+    if (inicio && b === jaleoEn && on('jal')) jaleo(t, v('jal'));
     if (inicio && on('met')) clic(t, acento, v('met'));
     if (on('pal')) {
       if (p.palmasPasos) { if (p.palmasPasos.indexOf(i % (n * sub)) >= 0) palma(t, true, i % (n * sub) === 0, v('pal')); }
       else if (inicio) {
-        if (acento) palma(t, true, true, v('pal'));
+        if (S.sordas) palma(t, false, acento, v('pal'));
+        else if (acento) palma(t, true, true, v('pal'));
         else if (p.palmasSuaves) palma(t, true, false, v('pal'));
         else palma(t, false, false, v('pal'));
       }

@@ -1,10 +1,11 @@
 // Guarda la app en el móvil para que funcione sin conexión
-const CACHE = 'compas-v4';
-// Grabaciones de palmas, cajón y guitarra (unos 300 KB en total)
+const CACHE = 'compas-v5';
+// Grabaciones de palmas, cajón, guitarra y jaleos (unos 420 KB en total)
 const SONIDOS = [
   'palmas/clara_1.wav', 'palmas/clara_2.wav', 'palmas/clara_3.wav',
   'palmas/sorda_1.wav', 'palmas/sorda_2.wav', 'palmas/sorda_3.wav',
   'cajon/cajon_1.wav', 'cajon/cajon_2.wav',
+  ...Array.from({ length: 17 }, (_, i) => 'jaleos/jaleo_' + (i + 1) + '.mp3'),
   ...['E2', 'Fs2', 'Gs2', 'A2', 'B2', 'Cs3', 'D3', 'E3', 'Fs3', 'G3', 'B3', 'Cs4', 'Ds4', 'E4', 'Fs4', 'Gs4'].map(n => 'guitarra/' + n + '.mp3')
 ].map(f => './sonidos/' + f);
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', ...SONIDOS];
