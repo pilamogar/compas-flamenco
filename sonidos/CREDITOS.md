@@ -8,6 +8,12 @@ Todas las grabaciones de esta carpeta tienen licencia libre. Se han pasado a mon
 - Licencia: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (dominio público). El proyecto indica que todos los `.wav` de su carpeta `audio/` son CC0.
 - Archivos: `clara_1-3.wav` (palmas claras), `sorda_1-3.wav` (palmas sordas), `cajon_1.wav` (golpe grave), `cajon_2.wav` (golpe agudo).
 
+## Jaleos (`jaleos/`)
+
+- Origen: [A Compás](https://gitlab.com/acompas/acompas) (`public/audio/acompas/jaleo/`). Según su README, los jaleos son grabaciones de Aziz Andry.
+- Licencia: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (dominio público). El README de A Compás indica que todos los `.wav` de `public/audio` son CC0.
+- Cambios: pasados a mono, sin el silencio del principio y del final, con el volumen igualado y en MP3 de 64 kbps.
+
 ## Guitarra (`guitarra/`)
 
 - Origen: notas sueltas de guitarra clásica de [tonejs-instruments](https://github.com/nbrosowsky/tonejs-instruments) (`samples/guitar-nylon/`), de Nicholaus Brosowsky, que a su vez proceden del pack de Freesound [«classicalguitar multisampled»](https://freesound.org/people/quartertone/packs/11573/) de quartertone.
