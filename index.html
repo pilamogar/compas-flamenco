@@ -182,6 +182,7 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
       <button class="pill outline" type="submit">Guardar</button>
     </form>
     <p class="toast" id="toast" aria-live="polite"></p>
+    <p class="sub" style="font-size:12px;margin-top:auto">Sonidos: palmas y cajón de <a href="https://gitlab.com/acompas/acompas" style="color:inherit">A Compás</a> (CC0); guitarra de quartertone vía <a href="https://github.com/nbrosowsky/tonejs-instruments" style="color:inherit">tonejs-instruments</a> (CC BY 3.0). <a href="sonidos/CREDITOS.md" style="color:inherit">Créditos</a></p>
   </section>
 </div>
 
@@ -422,17 +423,21 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
     pintarCombinaciones();
   });
 
-  // ---------- Motor de sonido (Web Audio, sonidos sintetizados) ----------
+  // ---------- Motor de sonido (Web Audio: grabaciones reales, con sonidos sintetizados de reserva) ----------
   var ctx = null, master = null, ruido = null;
   function audio() {
     if (!ctx) {
       var AC = window.AudioContext || window.webkitAudioContext;
-      ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+      ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.9;
+      // Limitador suave para que palmas, cajón y guitarra juntos no saturen el altavoz del móvil
+      var lim = ctx.createDynamicsCompressor(); lim.threshold.value = -6; lim.knee.value = 6; lim.ratio.value = 8; lim.attack.value = 0.002; lim.release.value = 0.15;
+      master.connect(lim); lim.connect(ctx.destination);
       var len = Math.floor(ctx.sampleRate * 0.4), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
       for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
       ruido = buf;
     }
     if (ctx.state === 'suspended') ctx.resume();
+    cargarMuestras();
   }
   function env(t, peak, dur) { var g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); g.connect(master); return g; }
   function noise(t, dur, filtros, g) {
@@ -446,7 +451,7 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
     var o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = fuerte ? 1760 : 1100;
     var g = env(t, vol * (fuerte ? 0.9 : 0.45), 0.05); o.connect(g); o.start(t); o.stop(t + 0.07);
   }
-  function palma(t, clara, fuerte, vol) {
+  function palmaSintetica(t, clara, fuerte, vol) {
     // Varias manos ligeramente desfasadas para que suene a palmas de grupo
     var manos = clara ? 3 : 2;
     for (var i = 0; i < manos; i++) {
@@ -460,7 +465,7 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
       }
     }
   }
-  function caja(t, grave, vol) {
+  function cajaSintetica(t, grave, vol) {
     if (grave) {
       var o = ctx.createOscillator(); o.type = 'sine';
       o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(55, t + 0.15);
@@ -484,7 +489,7 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
     for (var j = N; j < len; j++) y[j] = amort * (y[j - N] + y[j - N - 1 < 0 ? 0 : j - N - 1]);
     cuerdas[midi] = buf; return buf;
   }
-  function rasgueo(t, nombre, fuerte, vol) {
+  function rasgueoSintetico(t, nombre, fuerte, vol) {
     var notas = ACORDES[nombre]; if (!notas) return;
     var sep = fuerte ? 0.011 : 0.007, dur = fuerte ? 1.1 : 0.35;
     notas.forEach(function (m, i) {
@@ -499,6 +504,89 @@ input[type=range] { width: 100%; accent-color: var(--accent-fill); height: 28px;
     });
     // Golpe de las uñas sobre las cuerdas
     if (fuerte) noise(t, 0.03, [filtro('highpass', 2500)], env(t, vol * 0.12, 0.03));
+  }
+
+
+  // ---------- Grabaciones reales (ver CREDITOS.md) ----------
+  // Palmas y cajón: A Compás (CC0). Guitarra: notas sueltas de guitarra clásica (CC BY 3.0).
+  // Mientras no se han cargado, o si fallan, suenan los sonidos sintetizados de arriba.
+  var MUESTRAS = {
+    clara: ['palmas/clara_1.wav', 'palmas/clara_2.wav', 'palmas/clara_3.wav'],
+    sorda: ['palmas/sorda_1.wav', 'palmas/sorda_2.wav', 'palmas/sorda_3.wav'],
+    cajonGrave: ['cajon/cajon_1.wav'],
+    cajonAgudo: ['cajon/cajon_2.wav']
+  };
+  // Notas grabadas de la guitarra (MIDI → archivo); las demás se sacan de la más cercana
+  var NOTAS_GUITARRA = { 40: 'E2', 42: 'Fs2', 44: 'Gs2', 45: 'A2', 47: 'B2', 49: 'Cs3', 50: 'D3', 52: 'E3',
+    54: 'Fs3', 55: 'G3', 59: 'B3', 61: 'Cs4', 63: 'Ds4', 64: 'E4', 66: 'Fs4', 68: 'Gs4' };
+  var M = { clara: [], sorda: [], cajonGrave: [], cajonAgudo: [], guitarra: {} }, cargando = false;
+  function decodificar(datos) {
+    // Forma con callbacks para que funcione también en Safari antiguo
+    return new Promise(function (ok, mal) { ctx.decodeAudioData(datos, ok, mal); });
+  }
+  function conInicio(b) {
+    // Salta el silencio inicial (p. ej. el relleno de los MP3) para que el golpe caiga a tiempo
+    var d = b.getChannelData(0), pico = 0, i;
+    for (i = 0; i < d.length; i++) if (Math.abs(d[i]) > pico) pico = Math.abs(d[i]);
+    for (i = 0; i < d.length && Math.abs(d[i]) < pico * 0.05; i++) {}
+    return { b: b, ini: Math.max(0, i - 16) / b.sampleRate };
+  }
+  function cargar(ruta) {
+    return fetch('sonidos/' + ruta).then(function (r) { if (!r.ok) throw new Error(ruta); return r.arrayBuffer(); })
+      .then(decodificar).then(conInicio);
+  }
+  function cargarMuestras() {
+    if (cargando || !window.fetch || !window.Promise) return;
+    cargando = true;
+    Object.keys(MUESTRAS).forEach(function (k) {
+      MUESTRAS[k].forEach(function (ruta) { cargar(ruta).then(function (m) { M[k].push(m); }).catch(function () {}); });
+    });
+    Object.keys(NOTAS_GUITARRA).forEach(function (midi) {
+      cargar('guitarra/' + NOTAS_GUITARRA[midi] + '.mp3').then(function (m) { M.guitarra[midi] = m; }).catch(function () {});
+    });
+  }
+  function sonar(m, t, vol, ritmo, dur) {
+    var s = ctx.createBufferSource(); s.buffer = m.b; s.playbackRate.value = ritmo || 1;
+    var g = ctx.createGain(); g.gain.value = vol; s.connect(g); g.connect(master);
+    s.start(t, m.ini);
+    if (dur) { g.gain.setValueAtTime(vol, t + dur); g.gain.setTargetAtTime(0.0001, t + dur, 0.06); s.stop(t + dur + 0.4); }
+    return g;
+  }
+  function algunaDe(lista) { return lista[Math.floor(Math.random() * lista.length)]; }
+
+  function palma(t, clara, fuerte, vol) {
+    var lista = clara ? M.clara : M.sorda;
+    if (!lista.length) return palmaSintetica(t, clara, fuerte, vol);
+    // Varias manos ligeramente desfasadas y con distinta grabación, como un grupo de palmeros
+    var manos = clara ? (fuerte ? 3 : 2) : 2;
+    var nivel = clara ? (fuerte ? 0.9 : 0.5) : 0.6;
+    for (var i = 0; i < manos; i++) {
+      sonar(algunaDe(lista), t + i * 0.006 + Math.random() * 0.004, vol * nivel / Math.sqrt(manos), 0.96 + Math.random() * 0.08);
+    }
+  }
+  function caja(t, grave, vol) {
+    var lista = grave ? M.cajonGrave : M.cajonAgudo;
+    if (!lista.length) return cajaSintetica(t, grave, vol);
+    sonar(lista[0], t, vol * (grave ? 1.1 : 0.7), 0.98 + Math.random() * 0.04);
+  }
+  function notaGuitarra(midi) {
+    // La grabación más cercana y cuánto hay que subirla o bajarla de tono
+    var mejor = null, dist = 99;
+    Object.keys(M.guitarra).forEach(function (k) { var d = Math.abs(k - midi); if (d < dist) { dist = d; mejor = +k; } });
+    if (mejor === null || dist > 3) return null;
+    return { m: M.guitarra[mejor], ritmo: Math.pow(2, (midi - mejor) / 12) };
+  }
+  function rasgueo(t, nombre, fuerte, vol) {
+    var notas = ACORDES[nombre]; if (!notas) return;
+    var listas = notas.map(notaGuitarra);
+    if (listas.some(function (x) { return !x; })) return rasgueoSintetico(t, nombre, fuerte, vol);
+    // Rasgueo hacia abajo: de la cuerda grave a la aguda, más abierto cuando es fuerte
+    var sep = fuerte ? 0.012 : 0.007, dur = fuerte ? 1.3 : 0.4;
+    listas.forEach(function (x, i) {
+      sonar(x.m, t + i * sep, vol * (fuerte ? 0.38 : 0.2), x.ritmo, dur);
+    });
+    // Golpe de las uñas sobre las cuerdas
+    if (fuerte) noise(t, 0.03, [filtro('highpass', 2500)], env(t, vol * 0.1, 0.03));
   }
 
   // ---------- Planificador con margen (tiempo preciso) ----------
