@@ -1,5 +1,5 @@
 // Guarda la app en el móvil para que funcione sin conexión
-const CACHE = 'compas-v4';
+const CACHE = 'compas-v5';
 // Grabaciones de palmas, cajón y guitarra (unos 300 KB en total)
 const SONIDOS = [
   'palmas/clara_1.wav', 'palmas/clara_2.wav', 'palmas/clara_3.wav',
