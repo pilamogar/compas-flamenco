@@ -280,6 +280,8 @@ input[type=range] { flex: 1; width: 100%; min-width: 0; accent-color: var(--acce
   function aplicarTema() {
     document.documentElement.setAttribute('data-theme', S.tema);
     document.querySelector('meta[name="theme-color"]').setAttribute('content', S.tema === 'light' ? '#F4F4F2' : '#0F0F12');
+    // En la app de Android, la barra de estado sigue al tema
+    try { if (window.CompasApp) window.CompasApp.tema(S.tema); } catch (e) {}
     var claro = S.tema === 'light';
     $('theme-btn').setAttribute('aria-label', claro ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
     $('theme-btn').innerHTML = (claro
@@ -680,15 +682,22 @@ input[type=range] { flex: 1; width: 100%; min-width: 0; accent-color: var(--acce
     try { if (wake) { wake.release(); wake = null; } } catch (e) {}
   }
 
+  // Botón «atrás» de Android: vuelve a la vista anterior en vez de cerrar la app
+  window.compasAtras = function () {
+    if (S.vista === 'combinaciones') { ir('practica'); return true; }
+    if (S.vista === 'practica') { parar(); ir('palos'); return true; }
+    return false;
+  };
+
   aplicarTema();
   pintarPalos();
 })();
 </script>
 
 <script>
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
+if ('serviceWorker' in navigator && !window.CompasApp) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
 (function () {
-  var instalada = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
+  var instalada = window.CompasApp || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
   if (instalada) return;
   var card = document.getElementById('install-card'), btn = document.getElementById('install-btn'), help = document.getElementById('install-help'), aviso = null;
   card.hidden = false; help.hidden = false;
